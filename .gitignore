@@ -1,0 +1,6 @@
+*.log
+bin/
+
+
+# macOS-specific files
+.DS_Store
