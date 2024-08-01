@@ -23,7 +23,7 @@ func Run() {
 		},
 		Action: func(*cli.Context) error {
 			p := tea.NewProgram(
-				latea.InitDefaultModel(),
+				latea.InitModel(),
 				tea.WithAltScreen(),
 				tea.WithMouseCellMotion(),
 			)

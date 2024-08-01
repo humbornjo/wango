@@ -2,6 +2,8 @@ package latea
 
 import (
 	"image/color"
+
+	"github.com/humbornjo/wango/pkg/render"
 )
 
 type WinSize struct {
@@ -12,16 +14,8 @@ type Palette struct {
 	clrs []color.RGBA
 }
 
-func InitDefaultPalette() Palette {
-	return Palette{
-		clrs: []color.RGBA{
-			color.RGBA{0xff, 0, 0, 0xff},
-			color.RGBA{0, 0, 0, 0xff},
-		},
-	}
-}
-
 type model struct {
+	wang          render.Wang
 	width, height int
 	path          string
 	mode          string
@@ -31,14 +25,6 @@ type model struct {
 	ws            WinSize
 }
 
-func InitDefaultModel() model {
-	return model{
-		width:   1600,
-		height:  1000,
-		texture: "vanilla",
-		palette: InitDefaultPalette(),
-		path:    "./",
-		seed:    3407,
-		ws:      WinSize{},
-	}
+func InitModel() model {
+	return model{}
 }

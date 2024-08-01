@@ -1,5 +1,6 @@
 *.log
 bin/
+public/
 
 
 # macOS-specific files
