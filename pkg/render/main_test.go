@@ -5,6 +5,7 @@ import (
 	"image/color"
 	"image/png"
 	"os"
+	"runtime"
 	"testing"
 )
 
@@ -14,8 +15,8 @@ var defaultShader = &MoistShader{defaultPalette()}
 func defaultPalette() color.Palette {
 	return color.Palette{
 		color.RGBA{0xff, 0, 0, 0xff},
-		color.RGBA{0, 0, 0xff, 0xff},
-		color.RGBA{0, 0, 0, 0xff},
+		color.RGBA{0, 0xff, 0xff, 0xff},
+		// color.RGBA{0, 0, 0, 0xff},
 	}
 }
 
@@ -29,11 +30,11 @@ func defaultSave(path string, img image.Image) {
 }
 
 func TestSingleBlock(t *testing.T) {
-	var w = 100
-	var h = 100
+	var w = 512
+	var h = 512
 	wang := Wang{
 		w, h,
-		Tile{100, defaultShader, color.RGBA{0, 0, 0, 0xff}},
+		Tile{512, defaultShader, color.RGBA{0, 0, 0, 0xff}},
 		*image.NewRGBA(image.Rect(0, 0, w, h)),
 		make(chan image.Rectangle, 10),
 	}
@@ -41,21 +42,21 @@ func TestSingleBlock(t *testing.T) {
 	WithBgColor(color.RGBA{0, 0, 0, 0xff})(&wang)
 
 	go wang.Map()
-	wang.Reduce(4)
+	wang.Reduce(runtime.NumCPU())
 	defaultSave("../../public/single.png", &wang.img)
 }
 
 func TestAtlas(t *testing.T) {
-	var w = 4000
-	var h = 4000
+	var w = 2048
+	var h = 2048
 	wang := Wang{
 		w, h,
-		Tile{400, defaultShader, color.RGBA{0, 0, 0, 0xff}},
+		Tile{512, defaultShader, color.RGBA{0, 0, 0, 0xff}},
 		*image.NewRGBA(image.Rect(0, 0, w, h)),
 		make(chan image.Rectangle, 10),
 	}
 
 	go wang.Map()
-	wang.Reduce(4)
+	wang.Reduce(runtime.NumCPU())
 	defaultSave("../../public/atlas.png", &wang.img)
 }

@@ -9,9 +9,9 @@ type Vec2f struct {
 	Y float64
 }
 
-func (v1 Vec2f) Dist(v2 Vec2f) float64 {
+func (v1 Vec2f) Dist(v2 Vec2f, norm int) float64 {
 	x, y := v1.X-v2.X, v1.Y-v2.Y
-	return math.Sqrt(x*x + y*y)
+	return math.Sqrt(math.Pow(x, float64(norm)) + math.Pow(y, float64(norm)))
 }
 
 func (v1 Vec2f) Add(v2 Vec2f) Vec2f {
@@ -38,11 +38,19 @@ func (v1 Vec2f) Gamma(pow float64) Vec2f {
 	return Vec2f{math.Pow(v1.X, pow), math.Pow(v1.Y, pow)}
 }
 
-func (v1 Vec2f) Fminf(v2 Vec2f) Vec2f {
+func (v1 Vec2f) Fminf(scalar float64) Vec2f {
+	return Vec2f{min(v1.X, scalar), min(v1.Y, scalar)}
+}
+
+func (v1 Vec2f) Fmaxf(scalar float64) Vec2f {
+	return Vec2f{max(v1.X, scalar), max(v1.Y, scalar)}
+}
+
+func (v1 Vec2f) Fmin(v2 Vec2f) Vec2f {
 	return Vec2f{min(v1.X, v2.X), min(v1.Y, v2.Y)}
 }
 
-func (v1 Vec2f) Fmaxf(v2 Vec2f) Vec2f {
+func (v1 Vec2f) Fmax(v2 Vec2f) Vec2f {
 	return Vec2f{max(v1.X, v2.X), max(v1.Y, v2.Y)}
 }
 
@@ -53,9 +61,10 @@ type Vec4f struct {
 	A float64
 }
 
-func (v1 Vec4f) Dist(v2 Vec4f) float64 {
+func (v1 Vec4f) Dist(v2 Vec4f, norm int) float64 {
 	x, y, z, a := v1.X-v2.X, v1.Y-v2.Y, v1.Z-v2.Z, v1.A-v2.A
-	return math.Sqrt(x*x + y*y + z*z + a*a)
+	return math.Sqrt(
+		math.Pow(x, float64(norm)) + math.Pow(y, float64(norm)) + math.Pow(z, float64(norm)) + math.Pow(a, float64(norm)))
 }
 
 func (v1 Vec4f) Add(v2 Vec4f) Vec4f {
@@ -82,10 +91,18 @@ func (v1 Vec4f) Gamma(pow float64) Vec4f {
 	return Vec4f{math.Pow(v1.X, pow), math.Pow(v1.Y, pow), math.Pow(v1.Z, pow), math.Pow(v1.A, pow)}
 }
 
-func (v1 Vec4f) Fminf(v2 Vec4f) Vec4f {
+func (v1 Vec4f) Fminf(scalar float64) Vec4f {
+	return Vec4f{min(v1.X, scalar), min(v1.Y, scalar), min(v1.Z, scalar), min(v1.A, scalar)}
+}
+
+func (v1 Vec4f) Fmaxf(scalar float64) Vec4f {
+	return Vec4f{max(v1.X, scalar), max(v1.Y, scalar), max(v1.Z, scalar), max(v1.A, scalar)}
+}
+
+func (v1 Vec4f) Fmin(v2 Vec4f) Vec4f {
 	return Vec4f{min(v1.X, v2.X), min(v1.Y, v2.Y), min(v1.Z, v2.Z), min(v1.A, v2.A)}
 }
 
-func (v1 Vec4f) Fmaxf(v2 Vec4f) Vec4f {
+func (v1 Vec4f) Fmax(v2 Vec4f) Vec4f {
 	return Vec4f{max(v1.X, v2.X), max(v1.Y, v2.Y), max(v1.Z, v2.Z), max(v1.A, v2.A)}
 }

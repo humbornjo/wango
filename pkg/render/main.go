@@ -22,13 +22,21 @@ type Wang struct {
 
 type WangOption func(*Wang)
 
+func InitWangWithOptions(width, height, size int, options ...WangOption) (w Wang) {
+	w.width = width
+	w.height = height
+	w.img = *image.NewRGBA(image.Rect(0, 0, width, height))
+	w.tasks = make(chan image.Rectangle, 10)
+	w.tile = Tile{size, nil, color.RGBA{}}
+	for _, option := range options {
+		option(&w)
+	}
+	return w
+}
+
 func WithBgColor(clr color.RGBA) WangOption {
 	return func(w *Wang) {
-		for i := range w.width {
-			for j := range w.height {
-				w.img.SetRGBA(i, j, clr)
-			}
-		}
+		w.tile.bgclr = clr
 	}
 }
 
@@ -74,7 +82,7 @@ func (t *Tile) Draw(img *image.RGBA) {
 	w := posMax.X - posMin.X
 	h := posMax.Y - posMin.Y
 
-	pattern := uint8(rand.Uint32())
+	pattern := uint8(rand.Uint32()) // TODO: unimplemented random pattern
 
 	for i := range w {
 		for j := range h {
