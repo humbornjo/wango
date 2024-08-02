@@ -11,6 +11,14 @@ wang's tile artwork generator impl by go.
 * smooth color blending.
 * various filters.
 
+# millstone
+
+
+```bash
+make test && open public/atlas.png
+
+```
+
 # usage 
 
 refer to help subcommand.

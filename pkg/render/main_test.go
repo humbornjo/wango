@@ -9,11 +9,12 @@ import (
 )
 
 // var defaultShader = &FooShader{defaultPalette()}
-var defaultShader = &JapanShader{}
+var defaultShader = &MoistShader{defaultPalette()}
 
 func defaultPalette() color.Palette {
 	return color.Palette{
 		color.RGBA{0xff, 0, 0, 0xff},
+		color.RGBA{0, 0, 0xff, 0xff},
 		color.RGBA{0, 0, 0, 0xff},
 	}
 }
@@ -32,11 +33,12 @@ func TestSingleBlock(t *testing.T) {
 	var h = 100
 	wang := Wang{
 		w, h,
-		Tile{100, defaultShader},
-		color.RGBA{0, 0, 0, 0},
+		Tile{100, defaultShader, color.RGBA{0, 0, 0, 0xff}},
 		*image.NewRGBA(image.Rect(0, 0, w, h)),
 		make(chan image.Rectangle, 10),
 	}
+
+	WithBgColor(color.RGBA{0, 0, 0, 0xff})(&wang)
 
 	go wang.Map()
 	wang.Reduce(4)
@@ -44,12 +46,11 @@ func TestSingleBlock(t *testing.T) {
 }
 
 func TestAtlas(t *testing.T) {
-	var w = 1000
-	var h = 1000
+	var w = 4000
+	var h = 4000
 	wang := Wang{
 		w, h,
-		Tile{100, defaultShader},
-		color.RGBA{0, 0, 0, 0},
+		Tile{400, defaultShader, color.RGBA{0, 0, 0, 0xff}},
 		*image.NewRGBA(image.Rect(0, 0, w, h)),
 		make(chan image.Rectangle, 10),
 	}

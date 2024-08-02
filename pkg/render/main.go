@@ -3,6 +3,7 @@ package render
 import (
 	"image"
 	"image/color"
+	"math/rand"
 	"sync"
 )
 
@@ -15,9 +16,20 @@ type ParaWang interface {
 type Wang struct {
 	width, height int
 	tile          Tile
-	bgclr         color.RGBA
 	img           image.RGBA
 	tasks         chan image.Rectangle
+}
+
+type WangOption func(*Wang)
+
+func WithBgColor(clr color.RGBA) WangOption {
+	return func(w *Wang) {
+		for i := range w.width {
+			for j := range w.height {
+				w.img.SetRGBA(i, j, clr)
+			}
+		}
+	}
 }
 
 func (w *Wang) Map() {
@@ -46,12 +58,13 @@ func (w *Wang) Reduce(peer int) {
 }
 
 type Shader interface {
-	Render(u, v float64, pattern uint8) color.RGBA
+	Render(Vec2f, uint8, color.RGBA) color.RGBA
 }
 
 type Tile struct {
 	size   int
 	shader Shader
+	bgclr  color.RGBA
 }
 
 func (t *Tile) Draw(img *image.RGBA) {
@@ -61,6 +74,8 @@ func (t *Tile) Draw(img *image.RGBA) {
 	w := posMax.X - posMin.X
 	h := posMax.Y - posMin.Y
 
+	pattern := uint8(rand.Uint32())
+
 	for i := range w {
 		for j := range h {
 			u := float64(i) / float64(w)
@@ -68,7 +83,7 @@ func (t *Tile) Draw(img *image.RGBA) {
 			img.SetRGBA(
 				i+posMin.X,
 				j+posMin.Y,
-				t.shader.Render(u, v, 0),
+				t.shader.Render(Vec2f{u, v}, pattern, t.bgclr),
 			)
 		}
 	}
