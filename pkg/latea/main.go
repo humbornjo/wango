@@ -5,9 +5,11 @@ import (
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 var inputWidth textinput.Model = textinput.New()
+var inputHeight textinput.Model = textinput.New()
 
 func (m model) Init() tea.Cmd {
 	inputWidth.CharLimit = 32
@@ -29,8 +31,8 @@ func (m model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Batch(cmds...)
 		}
 	case tea.WindowSizeMsg:
-		m.ws.width = msg.Width
-		m.ws.height = msg.Height
+		m.winsize.width = msg.Width
+		m.winsize.height = msg.Height
 		return m, nil
 	}
 
@@ -41,6 +43,11 @@ func (m model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	text := fmt.Sprintf("window width: %d, height %d\n", m.ws.width, m.ws.height)
-	return inputWidth.View() + "\n" + text
+	text := fmt.Sprintf(
+		"window width: %d, height %d\n",
+		m.winsize.width,
+		m.winsize.height,
+	)
+	imgSize := lipgloss.JoinHorizontal(0, inputWidth.View(), inputHeight.View())
+	return imgSize + "\n" + text
 }

@@ -21,8 +21,8 @@ type model struct {
 	mode          string
 	texture       string
 	palette       Palette
-	seed          uint
-	ws            WinSize
+	seed          int
+	winsize       WinSize
 }
 
 func InitModel() model {

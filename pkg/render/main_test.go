@@ -6,6 +6,7 @@ import (
 	"image/png"
 	"os"
 	"runtime"
+	"sync"
 	"testing"
 )
 
@@ -29,34 +30,38 @@ func defaultSave(path string, img image.Image) {
 	png.Encode(f, img)
 }
 
-func TestSingleBlock(t *testing.T) {
-	var w = 512
-	var h = 512
-	wang := Wang{
-		w, h,
-		Tile{512, defaultShader, color.RGBA{0, 0, 0, 0xff}},
-		*image.NewRGBA(image.Rect(0, 0, w, h)),
+func TestSingle(t *testing.T) {
+	var width = 512
+	var height = 512
+	w := Wang{
+		width, height,
+		Tile{512, defaultShader},
+		image.NewRGBA(image.Rect(0, 0, width, height)),
+		color.RGBA{0, 0, 0, 0xff},
 		make(chan image.Rectangle, 10),
+		&sync.Map{},
 	}
 
-	WithBgColor(color.RGBA{0, 0, 0, 0xff})(&wang)
+	WithBgColor(color.RGBA{0, 0, 0, 0xff})(&w)
 
-	go wang.Map()
-	wang.Reduce(runtime.NumCPU())
-	defaultSave("../../public/single.png", &wang.img)
+	go w.Map()
+	w.Reduce(runtime.NumCPU())
+	defaultSave("../../single.png", w.img)
 }
 
 func TestAtlas(t *testing.T) {
-	var w = 2048
-	var h = 2048
-	wang := Wang{
-		w, h,
-		Tile{512, defaultShader, color.RGBA{0, 0, 0, 0xff}},
-		*image.NewRGBA(image.Rect(0, 0, w, h)),
+	var width = 8000
+	var height = 8000
+	w := Wang{
+		width, height,
+		Tile{100, defaultShader},
+		image.NewRGBA(image.Rect(0, 0, width, height)),
+		color.RGBA{0, 0, 0, 0xff},
 		make(chan image.Rectangle, 10),
+		&sync.Map{},
 	}
 
-	go wang.Map()
-	wang.Reduce(runtime.NumCPU())
-	defaultSave("../../public/atlas.png", &wang.img)
+	go w.Map()
+	w.Reduce(runtime.NumCPU())
+	defaultSave("../../atlas.png", w.img)
 }
