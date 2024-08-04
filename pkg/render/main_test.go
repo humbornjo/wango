@@ -10,17 +10,6 @@ import (
 	"testing"
 )
 
-// var defaultShader = &FooShader{defaultPalette()}
-var defaultShader = &MoistShader{defaultPalette()}
-
-func defaultPalette() color.Palette {
-	return color.Palette{
-		color.RGBA{0xff, 0, 0, 0xff},
-		color.RGBA{0, 0xff, 0xff, 0xff},
-		// color.RGBA{0, 0, 0, 0xff},
-	}
-}
-
 func defaultSave(path string, img image.Image) {
 	f, err := os.Create(path)
 	if err != nil {
@@ -31,14 +20,15 @@ func defaultSave(path string, img image.Image) {
 }
 
 func TestSingle(t *testing.T) {
-	var width = 512
-	var height = 512
+	var width = SIZE
+	var height = SIZE
 	w := Wang{
 		width, height,
-		Tile{512, defaultShader},
+		Tile{SIZE, DefaultShader},
 		image.NewRGBA(image.Rect(0, 0, width, height)),
+		defaultClrNum,
 		color.RGBA{0, 0, 0, 0xff},
-		make(chan image.Rectangle, 10),
+		make(chan Task, 10),
 		&sync.Map{},
 	}
 
@@ -49,15 +39,16 @@ func TestSingle(t *testing.T) {
 	defaultSave("../../single.png", w.img)
 }
 
-func TestAtlas(t *testing.T) {
-	var width = 8000
-	var height = 8000
+func TestGrid(t *testing.T) {
+	var width = WIDTH
+	var height = HEIGHT
 	w := Wang{
 		width, height,
-		Tile{100, defaultShader},
+		Tile{SIZE, DefaultShader},
 		image.NewRGBA(image.Rect(0, 0, width, height)),
+		defaultClrNum,
 		color.RGBA{0, 0, 0, 0xff},
-		make(chan image.Rectangle, 10),
+		make(chan Task, 10),
 		&sync.Map{},
 	}
 

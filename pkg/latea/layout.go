@@ -1,6 +1,5 @@
 package latea
 
-// TODO
 func (m model) footerRender() {
 
 }

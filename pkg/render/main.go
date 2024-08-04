@@ -8,46 +8,147 @@ import (
 	"unsafe"
 )
 
+const (
+	WIDTH  = 2048
+	HEIGHT = 1536
+	SIZE   = 256
+)
+
+var DefaultShader = &MoistShader{DefaultPalette}
+
+var DefaultPalette = color.Palette{
+	color.RGBA{0xff, 0, 0, 0xff},
+	color.RGBA{0, 0xff, 0xff, 0xff},
+	// color.RGBA{0, 0, 0, 0xff},
+}
+
+var defaultClrNum = len(DefaultPalette)
+
 // render img parallely using map-reduce
 type ParaWang interface {
 	Map()
 	Reduce(peer int)
 }
 
+type Mask uint8
+
+type TileMask struct {
+	b Mask
+	l Mask
+	t Mask
+	r Mask
+}
+
+type Pattern uint8
+
+type TilePattern struct {
+	b Pattern
+	l Pattern
+	t Pattern
+	r Pattern
+}
+
+func (tp *TilePattern) Hash() (hash uint32) {
+	hash |= uint32(tp.b) << 24
+	hash |= uint32(tp.l) << 16
+	hash |= uint32(tp.t) << 8
+	hash |= uint32(tp.r)
+	return hash
+}
+
+func GenPattern(tilem TileMask, n int) (tilep TilePattern) {
+	tilep.b = (Pattern(rand.Intn(n))) & (Pattern(tilem.b) - 1)
+	tilep.l = (Pattern(rand.Intn(n))) & (Pattern(tilem.l) - 1)
+	tilep.t = (Pattern(rand.Intn(n))) & (Pattern(tilem.t) - 1)
+	tilep.r = (Pattern(rand.Intn(n))) & (Pattern(tilem.r) - 1)
+	return tilep
+}
+
+type Task struct {
+	rect  image.Rectangle
+	tilep TilePattern
+}
+
 type Wang struct {
 	width, height int
 	tile          Tile
 	img           *image.RGBA
-	bgclr         color.RGBA
-	tasks         chan image.Rectangle
+	clrNum        int
+	clrBg         color.RGBA
+	tasks         chan Task
 	cache         *sync.Map
 }
 
 type WangOption func(*Wang)
 
-func InitWangWithOptions(width, height, size int, options ...WangOption) (w Wang) {
-	w.width = width
-	w.height = height
-	w.img = image.NewRGBA(image.Rect(0, 0, width, height))
-	w.tasks = make(chan image.Rectangle, 10)
-	w.tile = Tile{size, nil}
+func InitWangWithOptions(options ...WangOption) (w Wang) {
+	w.width = WIDTH
+	w.height = HEIGHT
+	w.tile = Tile{SIZE, DefaultShader}
 	for _, option := range options {
 		option(&w)
 	}
+	w.tasks = make(chan Task, 10)
+	w.img = image.NewRGBA(image.Rect(0, 0, w.width, w.height))
 	return w
+}
+
+func WithWidth(width int) WangOption {
+	return func(w *Wang) {
+		w.width = width
+	}
+}
+
+func WithHeight(height int) WangOption {
+	return func(w *Wang) {
+		w.height = height
+	}
+}
+
+func WithSize(size int) WangOption {
+	return func(w *Wang) {
+		w.tile.size = size
+	}
 }
 
 func WithBgColor(clr color.RGBA) WangOption {
 	return func(w *Wang) {
-		w.bgclr = clr
+		w.clrBg = clr
 	}
 }
 
 func (w *Wang) Map() {
-	stride := w.tile.size
-	for j := 0; j < w.height; j += stride {
-		for i := 0; i < w.width; i += stride {
-			w.tasks <- image.Rect(i, j, i+stride, j+stride)
+	span := w.tile.size
+	tw := w.width / w.tile.size
+	th := w.height / w.tile.size
+	patternGrid := make([][]TilePattern, th)
+	for i := range th {
+		patternGrid[i] = make([]TilePattern, tw)
+	}
+
+	patternGrid[0][0] = GenPattern(TileMask{}, w.clrNum)
+	for j := 1; j < tw; j++ {
+		tilep := GenPattern(TileMask{0, 1, 0, 0}, w.clrNum)
+		tilep.l = patternGrid[0][j-1].r
+		patternGrid[0][j] = tilep
+	}
+
+	for i := 1; i < th; i++ {
+		tilep := GenPattern(TileMask{0, 0, 1, 0}, w.clrNum)
+		tilep.t = patternGrid[i-1][0].b
+		patternGrid[i][0] = tilep
+	}
+
+	for i := 1; i < th; i++ {
+		for j := 1; j < tw; j++ {
+			tilep := GenPattern(TileMask{0, 1, 1, 0}, w.clrNum)
+			tilep.l = patternGrid[i][j-1].r
+			tilep.t = patternGrid[i-1][j].b
+			patternGrid[i][j] = tilep
+			w.tasks <- Task{
+				rect:  image.Rect(j*span, i*span, j*span+span, i*span+span),
+				tilep: patternGrid[i][j],
+			}
 		}
 	}
 	close(w.tasks)
@@ -62,8 +163,8 @@ func (w *Wang) Reduce(peer int) {
 			task, ok := <-w.tasks
 			for ; ok; task, ok = <-w.tasks {
 				w.Draw(
-					w.img.SubImage(task).(*image.RGBA),
-					uint8(((rand.Uint32()%2)<<6)|((rand.Uint32()%2)<<4)|((rand.Uint32()%2)<<2)|(rand.Uint32()%2)),
+					w.img.SubImage(task.rect).(*image.RGBA),
+					task.tilep,
 				)
 			}
 		}()
@@ -71,46 +172,45 @@ func (w *Wang) Reduce(peer int) {
 	wg.Wait()
 }
 
-type Shader interface {
-	Render(Vec2f, uint8, color.RGBA) color.RGBA
-}
-
 type Tile struct {
 	size   int
 	shader Shader
 }
 
-func (w *Wang) Draw(img *image.RGBA, pattern uint8) {
+func (w *Wang) Draw(img *image.RGBA, tilep TilePattern) {
 	rect := img.Bounds()
 	posMin := rect.Min
 	posMax := rect.Max
 	width := posMax.X - posMin.X
 	height := posMax.Y - posMin.Y
 
-	if block, ok := w.cache.Load(pattern); ok {
-		stride := width * 4
-
+	if block, ok := w.cache.Load(tilep.Hash()); ok {
+		span := width * 4
 		srcImg := block.(*image.RGBA)
 		srcPosMin := srcImg.Bounds().Min
 		destImg := img
 		destPosMin := posMin
 
-		for j := range height {
-			srcPixPtr := &destImg.Pix[destImg.PixOffset(destPosMin.X, destPosMin.Y+j)]
+		for i := range height {
+			srcPixPtr := &destImg.Pix[srcImg.PixOffset(srcPosMin.X, srcPosMin.Y+i)]
 			srcBytePtr := (*byte)(unsafe.Pointer(srcPixPtr))
-			destPixPtr := &srcImg.Pix[srcImg.PixOffset(srcPosMin.X, srcPosMin.Y+j)]
+			destPixPtr := &srcImg.Pix[destImg.PixOffset(destPosMin.X, destPosMin.Y+i)]
 			destBytePtr := (*byte)(unsafe.Pointer(destPixPtr))
-			copy(unsafe.Slice(srcBytePtr, stride), unsafe.Slice(destBytePtr, stride))
+			copy(unsafe.Slice(srcBytePtr, span), unsafe.Slice(destBytePtr, span))
 		}
 		return
 	}
 
-	for i := range width {
-		for j := range height {
-			u := float64(i) / float64(width)
-			v := float64(j) / float64(height)
-			img.SetRGBA(i+posMin.X, j+posMin.Y, w.tile.shader.Render(Vec2f{u, v}, pattern, w.bgclr))
+	for j := range width {
+		for i := range height {
+			u := float64(j) / float64(width)
+			v := float64(i) / float64(height)
+			img.SetRGBA(
+				j+posMin.X,
+				i+posMin.Y,
+				w.tile.shader.Render(Vec2f{u, v}, tilep, w.clrBg),
+			)
 		}
 	}
-	w.cache.Store(pattern, img)
+	w.cache.Store(tilep.Hash(), img)
 }
