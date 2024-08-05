@@ -1,6 +1,7 @@
 package render
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"image/png"
@@ -8,6 +9,7 @@ import (
 	"runtime"
 	"sync"
 	"testing"
+	"unsafe"
 )
 
 func defaultSave(path string, img image.Image) {
@@ -23,13 +25,10 @@ func TestSingle(t *testing.T) {
 	var width = SIZE
 	var height = SIZE
 	w := Wang{
-		width, height,
-		Tile{SIZE, DefaultShader},
+		width, height, Tile{SIZE, DefaultShader},
 		image.NewRGBA(image.Rect(0, 0, width, height)),
-		defaultClrNum,
-		color.RGBA{0, 0, 0, 0xff},
-		make(chan Task, 10),
-		&sync.Map{},
+		DefaultClrNum, color.RGBA{0, 0, 0, 0xff},
+		make(chan Task, 10), &sync.Map{},
 	}
 
 	WithBgColor(color.RGBA{0, 0, 0, 0xff})(&w)
@@ -46,7 +45,7 @@ func TestGrid(t *testing.T) {
 		width, height,
 		Tile{SIZE, DefaultShader},
 		image.NewRGBA(image.Rect(0, 0, width, height)),
-		defaultClrNum,
+		DefaultClrNum,
 		color.RGBA{0, 0, 0, 0xff},
 		make(chan Task, 10),
 		&sync.Map{},
@@ -54,5 +53,8 @@ func TestGrid(t *testing.T) {
 
 	go w.Map()
 	w.Reduce(runtime.NumCPU())
-	defaultSave("../../atlas.png", w.img)
+	defaultSave("../../grid.png", w.img)
+
+	var bl = false
+	fmt.Printf("%v\n", *(*uint8)(unsafe.Pointer(&bl))-1)
 }
