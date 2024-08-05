@@ -21,6 +21,16 @@ var DefaultPalette = color.Palette{
 	color.RGBA{0, 0xff, 0xff, 0xff},
 }
 
+// tile parts
+//
+// +---------+
+// |+   t   +|
+// |  +   +  |
+// | l  *  r |
+// |  +   +  |
+// |+   b   +|
+// +---------+
+
 type Mask bool
 
 type TileMask struct {
