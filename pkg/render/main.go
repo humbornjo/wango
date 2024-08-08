@@ -50,22 +50,15 @@ type TilePattern struct {
 }
 
 func (tp *TilePattern) Hash() (hash uint32) {
-	hash |= uint32(tp.b) << 24
-	hash |= uint32(tp.l) << 16
-	hash |= uint32(tp.t) << 8
-	hash |= uint32(tp.r)
+	hash = (uint32(tp.b) << 24) | uint32(tp.l)<<16 | uint32(tp.t)<<8 | uint32(tp.r)
 	return hash
 }
 
 func GenPattern(tilem TileMask, n int) (tilep TilePattern) {
-	tilep.b = (Pattern(rand.Intn(n))) &
-		(*(*Pattern)(unsafe.Pointer(&tilem.b)) - 1)
-	tilep.l = (Pattern(rand.Intn(n))) &
-		(*(*Pattern)(unsafe.Pointer(&tilem.l)) - 1)
-	tilep.t = (Pattern(rand.Intn(n))) &
-		(*(*Pattern)(unsafe.Pointer(&tilem.t)) - 1)
-	tilep.r = (Pattern(rand.Intn(n))) &
-		(*(*Pattern)(unsafe.Pointer(&tilem.r)) - 1)
+	tilep.b = (Pattern(rand.Intn(n))) & (*(*Pattern)(unsafe.Pointer(&tilem.b)) - 1)
+	tilep.l = (Pattern(rand.Intn(n))) & (*(*Pattern)(unsafe.Pointer(&tilem.l)) - 1)
+	tilep.t = (Pattern(rand.Intn(n))) & (*(*Pattern)(unsafe.Pointer(&tilem.t)) - 1)
+	tilep.r = (Pattern(rand.Intn(n))) & (*(*Pattern)(unsafe.Pointer(&tilem.r)) - 1)
 	return tilep
 }
 
@@ -133,29 +126,20 @@ func (w *Wang) Map() {
 
 	patternGrid[0][0] = GenPattern(TileMask{}, w.clrNum)
 	for j := 1; j < tw; j++ {
-		tilep := GenPattern(
-			TileMask{false, true, false, false},
-			w.clrNum,
-		)
+		tilep := GenPattern(TileMask{false, true, false, false}, w.clrNum)
 		tilep.l = patternGrid[0][j-1].r
 		patternGrid[0][j] = tilep
 	}
 
 	for i := 1; i < th; i++ {
-		tilep := GenPattern(
-			TileMask{false, false, true, false},
-			w.clrNum,
-		)
+		tilep := GenPattern(TileMask{false, false, true, false}, w.clrNum)
 		tilep.t = patternGrid[i-1][0].b
 		patternGrid[i][0] = tilep
 	}
 
 	for i := 1; i < th; i++ {
 		for j := 1; j < tw; j++ {
-			tilep := GenPattern(
-				TileMask{false, true, true, false},
-				w.clrNum,
-			)
+			tilep := GenPattern(TileMask{false, true, true, false}, w.clrNum)
 			tilep.l = patternGrid[i][j-1].r
 			tilep.t = patternGrid[i-1][j].b
 			patternGrid[i][j] = tilep
