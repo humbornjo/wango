@@ -42,7 +42,9 @@ func (m model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			cmds := []tea.Cmd{}
 			cmds = append(cmds, inputWidth.Focus())
 			return m, tea.Batch(cmds...)
+		case "enter":
 		}
+
 	case tea.WindowSizeMsg:
 		winWidth = msg.Width
 		winHeight = msg.Height
@@ -57,13 +59,10 @@ func (m model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() (page string) {
 	page += "\n\n\n"
+	page += m.headerRender() + "\n\n"
 	{
-		nameStyle := lipgloss.NewStyle().
-			Align(lipgloss.Center).Width(72)
-		page += nameStyle.Render(config.CoolName()) + "\n\n"
-	}
-	{
-		inputStyle := BoxStyle(33, 12)
+
+		inputStyle := BoxStyle(30, 12)
 		input := inputStyle.
 			Align(lipgloss.Left).
 			Render(
@@ -76,7 +75,7 @@ func (m model) View() (page string) {
 				),
 			)
 
-		choiceStyle := BoxStyle(15, 8)
+		choiceStyle := BoxStyle(14, 8)
 		mode := choiceStyle.
 			Align(lipgloss.Center).
 			Render(choicesView("Mode", config.ChoicesMode, 1))
@@ -86,26 +85,15 @@ func (m model) View() (page string) {
 		choices := lipgloss.JoinHorizontal(lipgloss.Center, mode, shader)
 		leftbar := lipgloss.JoinVertical(lipgloss.Top, input, choices)
 
-		filter := BoxStyle(32, 12).Render("\n\n")
-		color := BoxStyle(32, 8).Render("")
+		filter := BoxStyle(30, 12).Render("\n\n")
+		color := BoxStyle(30, 8).Render("")
 		rightbar := lipgloss.JoinVertical(lipgloss.Top, filter, color)
 
 		body := lipgloss.JoinHorizontal(lipgloss.Top, leftbar, rightbar)
 
 		page += body + "\n"
 	}
+	page += m.footerRender()
 
-	{
-		textStyle := PlainStyle(64, 2)
-		// text := fmt.Sprintf(
-		// 	"window width: %d, height %d\n",
-		// 	winWidth,
-		// 	winHeight,
-		// )
-		help := textStyle.Align(lipgloss.Center).Render("j/k: select in box" + dotStyle + "tab/shift+tab: move between boxes" + dotStyle + "enter: generate" + dotStyle + "esc: quit")
-		footer := lipgloss.JoinVertical(lipgloss.Center, help)
-		page += textStyle.Align(lipgloss.Center).Render(footer)
-	}
-
-	return page
+	return m.centerRender(page)
 }
