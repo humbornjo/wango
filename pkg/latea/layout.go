@@ -8,7 +8,9 @@ import (
 
 func (m model) headerRender() string {
 	nameStyle := lipgloss.NewStyle().
-		Align(lipgloss.Center).Width(config.LayoutWidth)
+		Foreground(config.ClrFontNomo).
+		Align(lipgloss.Center).
+		Width(config.LayoutWidth)
 	header := nameStyle.Render(config.CoolName())
 	return header
 }
@@ -48,9 +50,13 @@ func (m model) footerRender() string {
 }
 
 func (m model) centerRender(page string) string {
-	return centerStyle.
-		Padding((winHeight-config.LayoutHeight)/2, (winWidth-config.LayoutWidth)/2).
+	padWidth := (winWidth - config.LayoutWidth) / 2
+	padHeight := (winHeight - config.LayoutHeight) / 2
+	centered := centerStyle.
+		Padding(padHeight, padWidth).
+		Align(lipgloss.Center).
 		Render(page)
+	return centered
 }
 
 func (m model) bodyRender() {
@@ -64,13 +70,12 @@ func checkbox(label string, checked bool) string {
 	return fmt.Sprintf("  %s", label)
 }
 
-func choicesView(title string, choices []string, idx int) string {
-
+func choicesView(title string, choices []config.Choice) string {
 	tpl := "%s\n%s"
 
 	boxes := ""
-	for i, choice := range choices {
-		boxes += fmt.Sprintf("%s\n", checkbox(choice, idx == i))
+	for _, choice := range choices {
+		boxes += fmt.Sprintf("%s\n", checkbox(choice.Label, choice.Choosen))
 	}
 	boxes = boxes[:len(boxes)-1]
 

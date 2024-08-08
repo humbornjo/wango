@@ -17,8 +17,6 @@ var inputPath textinput.Model = textinput.New()
 var inputClrs textinput.Model = textinput.New()
 var inputClrBg textinput.Model = textinput.New()
 
-var inputs []any = []any{inputWidth, inputHeight}
-
 var (
 	winWidth  int
 	winHeight int
@@ -78,10 +76,10 @@ func (m model) View() (page string) {
 		choiceStyle := BoxStyle(14, 8)
 		mode := choiceStyle.
 			Align(lipgloss.Center).
-			Render(choicesView("Mode", config.ChoicesMode, 1))
+			Render(choicesView("Mode", config.ChoicesMode))
 		shader := choiceStyle.
 			Align(lipgloss.Center).
-			Render(choicesView("Shader", config.ChoicesMode, 2))
+			Render(choicesView("Shader", config.ChoicesShader))
 		choices := lipgloss.JoinHorizontal(lipgloss.Center, mode, shader)
 		leftbar := lipgloss.JoinVertical(lipgloss.Top, input, choices)
 
