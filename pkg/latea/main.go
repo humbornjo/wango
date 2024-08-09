@@ -20,6 +20,7 @@ var inputClrBg textinput.Model = textinput.New()
 var (
 	winWidth  int
 	winHeight int
+	ius       = []InputUnit{}
 )
 
 func (m model) Init() tea.Cmd {
@@ -36,11 +37,17 @@ func (m model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "esc", "ctrl+c":
 			return m, tea.Quit
-		case "tab":
+		case "tab": // TODO:
+			m.stage = (m.stage + 1) % len(ius)
 			cmds := []tea.Cmd{}
 			cmds = append(cmds, inputWidth.Focus())
 			return m, tea.Batch(cmds...)
-		case "enter":
+		case "shift+tab": // TODO:
+			m.stage = (m.stage - 1) % len(ius)
+			cmds := []tea.Cmd{}
+			cmds = append(cmds, inputWidth.Focus())
+			return m, tea.Batch(cmds...)
+		case "enter": // TODO:
 		}
 
 	case tea.WindowSizeMsg:
@@ -49,6 +56,7 @@ func (m model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 
+	// cmd := ius[m.stage].TypeAction(message)
 	var cmd tea.Cmd
 
 	inputWidth, cmd = inputWidth.Update(message)

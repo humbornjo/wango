@@ -12,8 +12,8 @@ const (
 var (
 	ClrLayoutBorder = lipgloss.Color("#FFEBD4")
 	ClrFontNomo     = lipgloss.Color("#FAFAFA")
-	ClrFontFocus    = lipgloss.Color("#F7B5CA")
 	ClrFontHard     = lipgloss.Color("#F0A8D0")
+	ClrFontFocus    = lipgloss.Color("#FFC6C6")
 	ClrFontDimed    = lipgloss.Color("#626262")
 )
 
@@ -42,7 +42,7 @@ var Manual = []Man{
 	{" tab/S-tab ", "move in boxes"},
 	{"space     ", "toggle confirmation"},
 	{"enter     ", "start generating"},
-	{"esc       ", "quit"},
+	{"esc/C-c   ", "quit"},
 }
 
 func CoolName() string {

@@ -40,7 +40,7 @@ func (m model) footerRender() string {
 	manbarStyle := lipgloss.NewStyle().
 		Align(lipgloss.Left).
 		Width(config.LayoutWidth / 2).
-		Height(max(len(odd), len(even)))
+		Height((len(config.Manual) + 1) / 2)
 
 	leftbar := manbarStyle.Render(even...)
 	rightbar := manbarStyle.Render(odd...)
@@ -65,19 +65,18 @@ func (m model) bodyRender() {
 
 func checkbox(label string, checked bool) string {
 	if checked {
-		return checkboxStyle.Render("* " + label)
+		return checkboxStyle.Bold(false).Render("* " + label)
 	}
 	return fmt.Sprintf("  %s", label)
 }
 
 func choicesView(title string, choices []config.Choice) string {
-	tpl := "%s\n%s"
+	view := choiceTitleStyle.Bold(true).Render(title) + "\n"
 
-	boxes := ""
 	for _, choice := range choices {
-		boxes += fmt.Sprintf("%s\n", checkbox(choice.Label, choice.Choosen))
+		view += fmt.Sprintf("%s\n", checkbox(choice.Label, choice.Choosen))
 	}
-	boxes = boxes[:len(boxes)-1]
+	view = view[:len(view)-1]
 
-	return fmt.Sprintf(tpl, title, boxes)
+	return view
 }

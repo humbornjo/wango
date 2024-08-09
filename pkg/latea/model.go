@@ -17,11 +17,10 @@ type model struct {
 	wang          render.Wang
 	width, height int
 	path          string
-	mode          string
 	texture       string
 	palette       color.Palette
 	seed          int
-	winsize       WinSize
+	stage         int
 }
 
 func InitModel() model {
@@ -35,7 +34,7 @@ type InputUnit struct {
 	index     int
 }
 
-func (iu *InputUnit) Action(message tea.Msg) tea.Cmd {
+func (iu *InputUnit) TypeAction(message tea.Msg) tea.Cmd {
 	switch reflect.TypeOf(iu.data) {
 	// ran into a choices unit
 	case reflect.TypeOf([]string{}):
