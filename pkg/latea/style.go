@@ -1,6 +1,7 @@
 package latea
 
 import (
+	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/humbornjo/wango/pkg/config"
 )
@@ -28,4 +29,12 @@ func BoxStyle(width int, height int) lipgloss.Style {
 		Padding(0, 1, 1, 1).
 		Width(width).
 		Height(height)
+}
+
+func TextinputStyle(charlimit int, prompt string) textinput.Model {
+	ti := textinput.New()
+	ti.Width = charlimit
+	ti.CharLimit = charlimit
+	ti.Prompt = prompt
+	return ti
 }

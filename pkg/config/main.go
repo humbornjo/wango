@@ -3,10 +3,18 @@ package config
 import "github.com/charmbracelet/lipgloss"
 
 const (
-	LayoutWidth  = 64
-	LayoutHeight = 24
-	LayoutMargin = 0
-	LayoutBorder = 1
+	WIDTH  = 2048
+	HEIGHT = 1536
+	SIZE   = 256
+
+	LayoutWidth    = 64
+	LayoutHeight   = 24
+	LayoutMargin   = 0
+	LayoutBorder   = 1
+	BoxWidth       = LayoutWidth/2 - LayoutBorder*2
+	BoxWidthHalf   = (BoxWidth - LayoutBorder*2) / 2
+	BoxHeightLong  = 12
+	BoxHeightShort = 8
 )
 
 var (
@@ -23,18 +31,19 @@ type Man struct {
 }
 
 type Choice struct {
-	Label   string
-	Choosen bool
+	Label    string
+	Choosen  bool
+	Selected bool
 }
 
-var ChoicesMode = []Choice{
-	{"      up", true},
-	{"    down", false},
-	{"   exact", false},
+var ChoicesMode = []*Choice{
+	{"      up", true, false},
+	{"    down", false, false},
+	{"   exact", false, false},
 }
 
-var ChoicesShader = []Choice{
-	{"   moist", true},
+var ChoicesShader = []*Choice{
+	{"   moist", true, false},
 }
 
 var Manual = []Man{

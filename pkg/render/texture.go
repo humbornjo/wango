@@ -17,12 +17,14 @@ type Shader interface {
 	Render(Vec2f, TilePattern, color.RGBA) color.RGBA
 }
 
+// foo shader
 type FooShader struct{}
 
 func (s *FooShader) Render(p Vec2f, pattern TilePattern, clr color.RGBA) color.RGBA {
 	return color.RGBA{uint8(p.X * 0xff), uint8(p.Y * 0xff), 0, 0xff}
 }
 
+// japan shader
 type JapanShader struct{}
 
 func (s *JapanShader) Render(p Vec2f, pattern TilePattern, clr color.RGBA) color.RGBA {
@@ -32,6 +34,7 @@ func (s *JapanShader) Render(p Vec2f, pattern TilePattern, clr color.RGBA) color
 	return color.RGBA{0xff, mask & 0xff, mask & 0xff, 0xff}
 }
 
+// moist shader
 type MoistShader struct {
 	palette color.Palette
 }
@@ -51,4 +54,13 @@ func (s *MoistShader) Render(p Vec2f, tilep TilePattern, bgclr color.RGBA) color
 
 	rgba4f = rgba4f.Gamma(1.0 / 2.2).Mul(0xff)
 	return rgba4f.ToRGBA()
+}
+
+// path shader
+type PathShader struct{}
+
+func (s *PathShader) Render(p Vec2f, tilep TilePattern, bgclr color.RGBA) color.RGBA {
+	// Read block get meta data width, height
+	// return color.RGBA(img.get(width*p.X, height.Y))
+	return color.RGBA{}
 }

@@ -12,7 +12,7 @@ func (m model) headerRender() string {
 		Align(lipgloss.Center).
 		Width(config.LayoutWidth)
 	header := nameStyle.Render(config.CoolName())
-	return header
+	return "\n\n\n" + header
 }
 
 func (m model) footerRender() string {
@@ -59,22 +59,63 @@ func (m model) centerRender(page string) string {
 	return centered
 }
 
-func (m model) bodyRender() {
+func (m model) bodyRender() string {
 
+	inputStyle := BoxStyle(config.BoxWidth, config.BoxHeightLong)
+	upleft := inputStyle.
+		Align(lipgloss.Left).
+		Render(
+			lipgloss.JoinVertical(
+				lipgloss.Left,
+				ius[0].View(), "\n",
+				ius[1].View(), "\n",
+				ius[2].View(), "\n",
+				ius[3].View(),
+			),
+		)
+
+	choiceStyle := BoxStyle(config.BoxWidthHalf, config.BoxHeightShort)
+	mode := choiceStyle.
+		Align(lipgloss.Center).
+		Render(choicesView("Mode", config.ChoicesMode))
+	shader := choiceStyle.
+		Align(lipgloss.Center).
+		Render(choicesView("Shader", config.ChoicesShader))
+	bottomleft := lipgloss.JoinHorizontal(lipgloss.Center, mode, shader)
+
+	leftbar := lipgloss.JoinVertical(lipgloss.Top, upleft, bottomleft)
+
+	upright := BoxStyle(config.BoxWidth, config.BoxHeightLong).Render(ius[4].View())
+	bottomright := BoxStyle(config.BoxWidth, config.BoxHeightShort).Render("filter")
+
+	rightbar := lipgloss.JoinVertical(lipgloss.Top, upright, bottomright)
+
+	body := lipgloss.JoinHorizontal(lipgloss.Top, leftbar, rightbar)
+
+	return body
 }
 
-func checkbox(label string, checked bool) string {
-	if checked {
-		return checkboxStyle.Bold(false).Render("* " + label)
+func checkbox(choice *config.Choice) string {
+	var selected string
+	var choosen string
+	if choice.Selected {
+		selected = "* "
+	} else {
+		selected = "  "
 	}
-	return fmt.Sprintf("  %s", label)
+	if choice.Choosen {
+		choosen = checkboxStyle.Bold(false).Render(choice.Label)
+	} else {
+		choosen = choice.Label
+	}
+	return selected + choosen
 }
 
-func choicesView(title string, choices []config.Choice) string {
+func choicesView(title string, choices []*config.Choice) string {
 	view := choiceTitleStyle.Bold(true).Render(title) + "\n"
 
 	for _, choice := range choices {
-		view += fmt.Sprintf("%s\n", checkbox(choice.Label, choice.Choosen))
+		view += fmt.Sprintf("%s\n", checkbox(choice))
 	}
 	view = view[:len(view)-1]
 

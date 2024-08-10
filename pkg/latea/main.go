@@ -9,18 +9,24 @@ import (
 	"github.com/humbornjo/wango/pkg/config"
 )
 
-var inputWidth textinput.Model = textinput.New()
-var inputHeight textinput.Model = textinput.New()
-var inputSize textinput.Model = textinput.New()
-var inputPath textinput.Model = textinput.New()
-
-var inputClrs textinput.Model = textinput.New()
-var inputClrBg textinput.Model = textinput.New()
-
 var (
+	inputWidth  textinput.Model = TextinputStyle(6, ": ")
+	inputHeight textinput.Model = TextinputStyle(6, ": ")
+	inputSize   textinput.Model = TextinputStyle(6, ": ")
+	inputPath   textinput.Model = TextinputStyle(26, ": ")
+	inputClrBg  textinput.Model = TextinputStyle(10, ": ")
+
 	winWidth  int
 	winHeight int
-	ius       = []InputUnit{}
+	ius       = []InputUnit{
+		&TextinputUnit{&inputWidth, "width"},
+		&TextinputUnit{&inputHeight, "height"},
+		&TextinputUnit{&inputSize, "tile size"},
+		&TextinputUnit{&inputPath, "save path"},
+		&TextinputUnit{&inputClrBg, "background color"},
+		&SingleChoiceUnit{config.ChoicesMode, "mode"},
+		&SingleChoiceUnit{config.ChoicesShader, "shader"},
+	}
 )
 
 func (m model) Init() tea.Cmd {
@@ -28,6 +34,7 @@ func (m model) Init() tea.Cmd {
 	return tea.Batch(
 		tea.SetWindowTitle("wango"),
 		textinput.Blink,
+		inputWidth.Focus(),
 	)
 }
 
@@ -37,15 +44,17 @@ func (m model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "esc", "ctrl+c":
 			return m, tea.Quit
-		case "tab": // TODO:
+		case "tab":
+			cmds := []tea.Cmd{}
+			cmds = append(cmds, ius[m.stage].Blur())
 			m.stage = (m.stage + 1) % len(ius)
-			cmds := []tea.Cmd{}
-			cmds = append(cmds, inputWidth.Focus())
+			cmds = append(cmds, ius[m.stage].Focus())
 			return m, tea.Batch(cmds...)
-		case "shift+tab": // TODO:
-			m.stage = (m.stage - 1) % len(ius)
+		case "shift+tab":
 			cmds := []tea.Cmd{}
-			cmds = append(cmds, inputWidth.Focus())
+			cmds = append(cmds, ius[m.stage].Blur())
+			m.stage = (m.stage - 1 + len(ius)) % len(ius)
+			cmds = append(cmds, ius[m.stage].Focus())
 			return m, tea.Batch(cmds...)
 		case "enter": // TODO:
 		}
@@ -58,48 +67,19 @@ func (m model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 
 	// cmd := ius[m.stage].TypeAction(message)
 	var cmd tea.Cmd
-
-	inputWidth, cmd = inputWidth.Update(message)
+	cmd = ius[m.stage].Update(message)
 	return m, cmd
 }
 
 func (m model) View() (page string) {
-	page += "\n\n\n"
 	page += m.headerRender() + "\n\n"
-	{
-
-		inputStyle := BoxStyle(30, 12)
-		input := inputStyle.
-			Align(lipgloss.Left).
-			Render(
-				lipgloss.JoinVertical(
-					lipgloss.Left,
-					inputWidth.View(), "\n",
-					inputHeight.View(), "\n",
-					inputSize.View(), "\n",
-					inputPath.View(),
-				),
-			)
-
-		choiceStyle := BoxStyle(14, 8)
-		mode := choiceStyle.
-			Align(lipgloss.Center).
-			Render(choicesView("Mode", config.ChoicesMode))
-		shader := choiceStyle.
-			Align(lipgloss.Center).
-			Render(choicesView("Shader", config.ChoicesShader))
-		choices := lipgloss.JoinHorizontal(lipgloss.Center, mode, shader)
-		leftbar := lipgloss.JoinVertical(lipgloss.Top, input, choices)
-
-		filter := BoxStyle(30, 12).Render("\n\n")
-		color := BoxStyle(30, 8).Render("")
-		rightbar := lipgloss.JoinVertical(lipgloss.Top, filter, color)
-
-		body := lipgloss.JoinHorizontal(lipgloss.Top, leftbar, rightbar)
-
-		page += body + "\n"
-	}
+	page += m.bodyRender() + "\n"
 	page += m.footerRender()
 
-	return m.centerRender(page)
+	return m.centerRender(
+		lipgloss.JoinVertical(
+			lipgloss.Top,
+			page,
+		),
+	)
 }
