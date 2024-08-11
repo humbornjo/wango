@@ -44,4 +44,6 @@ wango help
 ```
 
 # reference
-
+- [charmbracelet/bubbletea](https://github.com/charmbracelet/bubbletea)
+- [tsoding/wang-tiles](https://github.com/tsoding/wang-tiles)
+- [fogleman/WangTiling](https://github.com/fogleman/WangTiling)
