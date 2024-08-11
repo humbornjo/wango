@@ -1,11 +1,16 @@
 package config
 
-import "github.com/charmbracelet/lipgloss"
+import (
+	"image/color"
+
+	"github.com/charmbracelet/lipgloss"
+)
 
 const (
 	WIDTH  = 2048
 	HEIGHT = 1536
 	SIZE   = 256
+	PATH   = "./wang_tile.png"
 
 	LayoutWidth    = 64
 	LayoutHeight   = 24
@@ -23,6 +28,8 @@ var (
 	ClrFontHard     = lipgloss.Color("#F0A8D0")
 	ClrFontFocus    = lipgloss.Color("#FFC6C6")
 	ClrFontDimed    = lipgloss.Color("#626262")
+
+	ClrBackground = color.RGBA{}
 )
 
 type Man struct {

@@ -6,7 +6,6 @@ wang's tile artwork generator impl by go.
 # features
 
 * user-friendly tui.
-* support up to 4 color.
 * random seed and repeatable output.
 * smooth color blending.
 * various filters.
@@ -15,9 +14,21 @@ wang's tile artwork generator impl by go.
 
 
 ```bash
-make test && open public/atlas.png
+# test
+make test && open grid.png
+
+# run
+# - empty input will use default config instead
+# - just run and press ENTER
+go run . 
 
 ```
+
+# todo
+
+[ ] seed support
+[ ] add some filters like sobel, etc.
+[ ] prettier layout
 
 # usage 
 

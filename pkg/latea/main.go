@@ -1,8 +1,6 @@
 package latea
 
 import (
-	// "fmt"
-
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -56,7 +54,9 @@ func (m model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			m.stage = (m.stage - 1 + len(ius)) % len(ius)
 			cmds = append(cmds, ius[m.stage].Focus())
 			return m, tea.Batch(cmds...)
-		case "enter": // TODO:
+		case "enter":
+			m.Generate()
+			return m, tea.Quit
 		}
 
 	case tea.WindowSizeMsg:
@@ -65,7 +65,6 @@ func (m model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 
-	// cmd := ius[m.stage].TypeAction(message)
 	var cmd tea.Cmd
 	cmd = ius[m.stage].Update(message)
 	return m, cmd

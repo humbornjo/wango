@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -8,6 +9,8 @@ import (
 	"github.com/humbornjo/wango/pkg/latea"
 	"github.com/urfave/cli/v2"
 )
+
+var ()
 
 func Run() {
 	app := &cli.App{
@@ -38,4 +41,10 @@ func Run() {
 	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
+
+	if latea.Err != nil {
+		fmt.Printf("failed: %v", latea.Err)
+		return
+	}
+	fmt.Printf("success: saved as %v", latea.Path)
 }

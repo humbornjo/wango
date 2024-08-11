@@ -1,15 +1,12 @@
 package render
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"image/png"
 	"os"
 	"runtime"
-	"sync"
 	"testing"
-	"unsafe"
 )
 
 func defaultSave(path string, img image.Image) {
@@ -24,37 +21,33 @@ func defaultSave(path string, img image.Image) {
 func TestSingle(t *testing.T) {
 	var width = SIZE
 	var height = SIZE
-	w := Wang{
-		width, height, Tile{SIZE, DefaultShader},
-		image.NewRGBA(image.Rect(0, 0, width, height)),
-		DefaultClrNum, color.RGBA{0, 0, 0, 0xff},
-		make(chan Task, 10), &sync.Map{},
-	}
+	wang := InitWangWithOptions(
+		WithWidth(width),
+		WithHeight(height),
+		WithSize(SIZE),
+		WithBgColor(color.RGBA{}),
+		WithShader(DefaultShader),
+		WithNumColor(DefaultClrNum),
+	)
 
-	WithBgColor(color.RGBA{0, 0, 0, 0xff})(&w)
-
-	go w.Map()
-	w.Reduce(runtime.NumCPU())
-	defaultSave("../../single.png", w.img)
+	go wang.Map()
+	wang.Reduce(runtime.NumCPU())
+	defaultSave("../../single.png", wang.img)
 }
 
 func TestGrid(t *testing.T) {
 	var width = WIDTH
 	var height = HEIGHT
-	w := Wang{
-		width, height,
-		Tile{SIZE, DefaultShader},
-		image.NewRGBA(image.Rect(0, 0, width, height)),
-		DefaultClrNum,
-		color.RGBA{0, 0, 0, 0xff},
-		make(chan Task, 10),
-		&sync.Map{},
-	}
+	wang := InitWangWithOptions(
+		WithWidth(width),
+		WithHeight(height),
+		WithSize(SIZE),
+		WithBgColor(color.RGBA{}),
+		WithShader(DefaultShader),
+		WithNumColor(DefaultClrNum),
+	)
 
-	go w.Map()
-	w.Reduce(runtime.NumCPU())
-	defaultSave("../../grid.png", w.img)
-
-	var bl = false
-	fmt.Printf("%v\n", *(*uint8)(unsafe.Pointer(&bl))-1)
+	go wang.Map()
+	wang.Reduce(runtime.NumCPU())
+	defaultSave("../../grid.png", wang.img)
 }

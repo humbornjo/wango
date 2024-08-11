@@ -3,7 +3,9 @@ package render
 import (
 	"image"
 	"image/color"
+	"image/png"
 	"math/rand"
+	"os"
 	"sync"
 	"unsafe"
 )
@@ -82,6 +84,7 @@ type WangOption func(*Wang)
 func InitWangWithOptions(options ...WangOption) (w Wang) {
 	w.width = WIDTH
 	w.height = HEIGHT
+	w.cache = &sync.Map{}
 	w.tile = Tile{SIZE, DefaultShader}
 	for _, option := range options {
 		option(&w)
@@ -103,15 +106,27 @@ func WithHeight(height int) WangOption {
 	}
 }
 
+func WithBgColor(clr color.RGBA) WangOption {
+	return func(w *Wang) {
+		w.clrBg = clr
+	}
+}
+
+func WithNumColor(num int) WangOption {
+	return func(w *Wang) {
+		w.clrNum = num
+	}
+}
+
 func WithSize(size int) WangOption {
 	return func(w *Wang) {
 		w.tile.size = size
 	}
 }
 
-func WithBgColor(clr color.RGBA) WangOption {
+func WithShader(shader Shader) WangOption {
 	return func(w *Wang) {
-		w.clrBg = clr
+		w.tile.shader = shader
 	}
 }
 
@@ -168,6 +183,19 @@ func (w *Wang) Reduce(peer int) {
 		}()
 	}
 	wg.Wait()
+}
+
+func (w *Wang) Save(path string, width, height int) error {
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	err = png.Encode(f, w.img.SubImage(image.Rect(0, 0, width, height)))
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 type Tile struct {

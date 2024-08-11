@@ -1,8 +1,6 @@
 package latea
 
 import (
-	"image/color"
-
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/humbornjo/wango/pkg/config"
@@ -16,9 +14,6 @@ type WinSize struct {
 type model struct {
 	wang          render.Wang
 	width, height int
-	path          string
-	texture       string
-	palette       color.Palette
 	seed          int
 	stage         int
 }
