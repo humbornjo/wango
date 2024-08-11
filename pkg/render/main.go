@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	WIDTH  = 2048
+	WIDTH  = 2560
 	HEIGHT = 1536
 	SIZE   = 256
 )
@@ -140,16 +140,28 @@ func (w *Wang) Map() {
 	}
 
 	patternGrid[0][0] = GenPattern(TileMask{}, w.clrNum)
+	w.tasks <- Task{
+		rect:  image.Rect(0, 0, span, span),
+		tilep: patternGrid[0][0],
+	}
 	for j := 1; j < tw; j++ {
 		tilep := GenPattern(TileMask{false, true, false, false}, w.clrNum)
 		tilep.l = patternGrid[0][j-1].r
 		patternGrid[0][j] = tilep
+		w.tasks <- Task{
+			rect:  image.Rect(j*span, 0, j*span+span, span),
+			tilep: patternGrid[0][j],
+		}
 	}
 
 	for i := 1; i < th; i++ {
 		tilep := GenPattern(TileMask{false, false, true, false}, w.clrNum)
 		tilep.t = patternGrid[i-1][0].b
 		patternGrid[i][0] = tilep
+		w.tasks <- Task{
+			rect:  image.Rect(0, i*span, span, i*span+span),
+			tilep: patternGrid[i][0],
+		}
 	}
 
 	for i := 1; i < th; i++ {
@@ -191,7 +203,7 @@ func (w *Wang) Save(path string, width, height int) error {
 		return err
 	}
 	defer f.Close()
-	err = png.Encode(f, w.img.SubImage(image.Rect(0, 0, width, height)))
+	err = png.Encode(f, w.img) // .SubImage(image.Rect(0, 0, width, height))
 	if err != nil {
 		return err
 	}
