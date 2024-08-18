@@ -46,5 +46,9 @@ func Run() {
 		fmt.Printf("failed: %v", latea.Err)
 		return
 	}
-	fmt.Printf("success: saved as %v", latea.Path)
+	if latea.Success {
+		fmt.Printf("success: saved as %v", latea.Path)
+		return
+	}
+	fmt.Println("till we meet again, ciallo～(∠・ω< )⌒★")
 }

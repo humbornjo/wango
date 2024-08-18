@@ -23,7 +23,10 @@ make test && open grid.png
 # run
 # - empty input will use default config instead
 # - just run and press ENTER
-go run . 
+go install github.com/humbornjo/wango && wango
+
+# to uninstall 
+rm $GOPATH/bin/wango
 
 ```
 
@@ -33,7 +36,7 @@ go run .
  
 [ ] add some filters like sobel, etc.
 
-[ ] prettier layout
+[x] prettier layout
 
 # usage 
 

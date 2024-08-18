@@ -13,11 +13,16 @@ const (
 )
 
 var (
-	choiceTitleStyle = lipgloss.NewStyle().Foreground(config.ClrFontHard)
-	checkboxStyle    = lipgloss.NewStyle().Foreground(config.ClrFontFocus)
-	subtleStyle      = lipgloss.NewStyle().Foreground(config.ClrFontDimed)
-	centerStyle      = lipgloss.NewStyle().Width(winWidth).Height(winHeight)
-	inputStyle       = lipgloss.NewStyle()
+	choiceTitleStyle   = lipgloss.NewStyle().Foreground(config.ClrFontHard)
+	checkboxStyle      = lipgloss.NewStyle().Foreground(config.ClrFontFocus)
+	subtleStyle        = lipgloss.NewStyle().Foreground(config.ClrFontDimed)
+	centerStyle        = lipgloss.NewStyle().Width(winWidth).Height(winHeight)
+	inputStyle         = lipgloss.NewStyle()
+	boldStyle          = lipgloss.NewStyle().Bold(true)
+	boxChubbyStyle     = BoxStyle(config.BoxWidth, config.BoxHeightLong)
+	boxSkinnyStyle     = BoxStyle(config.BoxWidth, config.BoxHeightShort)
+	boxChubbyHalfStyle = BoxStyle(config.BoxWidthHalf, config.BoxHeightLong)
+	boxSkinnyHalfStyle = BoxStyle(config.BoxWidthHalf, config.BoxHeightShort)
 )
 
 func BoxStyle(width int, height int) lipgloss.Style {
@@ -26,7 +31,7 @@ func BoxStyle(width int, height int) lipgloss.Style {
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(config.ClrLayoutBorder).
 		Foreground(config.ClrFontNomo).
-		Padding(0, 1, 1, 1).
+		Padding(0, 1, 0, 1).
 		Width(width).
 		Height(height)
 }

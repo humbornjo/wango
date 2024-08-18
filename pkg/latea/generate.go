@@ -1,6 +1,7 @@
 package latea
 
 import (
+	"fmt"
 	"image/color"
 	"runtime"
 	"strconv"
@@ -17,35 +18,38 @@ var (
 )
 
 func (m *model) Generate() {
-	width, err := ParseInt(&inputWidth, config.WIDTH)
-	if err != nil {
-		panic("fail parse width")
-	}
-
-	height, err := ParseInt(&inputHeight, config.HEIGHT)
-	if err != nil {
-		panic("fail parse height")
-	}
-
-	size, err := ParseInt(&inputSize, config.SIZE)
-	if err != nil {
-		panic("fail parse size")
-	}
-
-	color, err := ParseColor(&inputClrBg, config.ClrBackground)
-	if err != nil {
-		panic("fail parse color")
-	}
-
-	path, err := ParseStr(&inputPath, config.PATH)
-	if err != nil {
-		panic("fail parse path")
-	}
-
-	var imgWidth int
-	var imgHeight int
-	var mode string
+	var err error
+	var wang render.Wang
+	var imgWidth, imgHeight int
+	var size, width, height int
+	var mode, path string
+	var color color.RGBA
 	var shader render.Shader
+
+	width, err = ParseInt(&inputWidth, config.WIDTH)
+	if err != nil {
+		goto ret
+	}
+
+	height, err = ParseInt(&inputHeight, config.HEIGHT)
+	if err != nil {
+		goto ret
+	}
+
+	size, err = ParseInt(&inputSize, config.SIZE)
+	if err != nil {
+		goto ret
+	}
+
+	color, err = ParseColor(&inputClrBg, config.ClrBackground)
+	if err != nil {
+		goto ret
+	}
+
+	path, err = ParseStr(&inputPath, config.PATH)
+	if err != nil {
+		goto ret
+	}
 
 	for _, choice := range config.ChoicesShader {
 		if choice.Choosen {
@@ -79,7 +83,7 @@ func (m *model) Generate() {
 		m.height = height
 	}
 
-	wang := render.InitWangWithOptions(
+	wang = render.InitWangWithOptions(
 		render.WithWidth(imgWidth),
 		render.WithHeight(imgHeight),
 		render.WithSize(size),
@@ -91,6 +95,8 @@ func (m *model) Generate() {
 	go wang.Map()
 	wang.Reduce(runtime.NumCPU())
 	err = wang.Save(path, m.width, m.height)
+
+ret:
 	if err != nil {
 		Err = err
 		return
@@ -107,20 +113,36 @@ func ParseInt(ti *textinput.Model, def int) (int, error) {
 	return strconv.Atoi(str)
 }
 
-func ParseColor(ti *textinput.Model, def color.RGBA) (color.RGBA, error) {
-	str := ti.Value()
-	if str == "" {
-		return def, nil
-	}
-	return color.RGBA{}, nil
-}
-
 func ParseStr(ti *textinput.Model, def string) (string, error) {
 	str := ti.Value()
 	if str == "" {
 		str = def
 	}
 	return str, nil
+}
+
+func ParseColor(ti *textinput.Model, def color.RGBA) (color.RGBA, error) {
+	var err error
+	s := ti.Value()
+	if s == "" {
+		return def, nil
+	}
+
+	c := def
+	switch len(s) {
+	case 7:
+		_, err = fmt.Sscanf(s, "#%02x%02x%02x", &c.R, &c.G, &c.B)
+	case 4:
+		_, err = fmt.Sscanf(s, "#%1x%1x%1x", &c.R, &c.G, &c.B)
+		// Double the hex digits:
+		c.R *= 17
+		c.G *= 17
+		c.B *= 17
+	default:
+		err = fmt.Errorf("invalid length, must be 7 or 4")
+
+	}
+	return c, err
 }
 
 func CeilX(x int, y int) int {

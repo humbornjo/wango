@@ -44,13 +44,18 @@ type Choice struct {
 }
 
 var ChoicesMode = []*Choice{
-	{"      up", true, false},
-	{"    down", false, false},
-	{"   exact", false, false},
+	{"up         ", true, false},
+	{"down       ", false, false},
+	{"exact      ", false, false},
 }
 
 var ChoicesShader = []*Choice{
-	{"   moist", true, false},
+	{"moist      ", true, false},
+}
+
+var ChoicesFilter = []*Choice{
+	{"identical  ", true, false},
+	{"noise      ", false, false},
 }
 
 var Manual = []Man{

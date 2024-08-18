@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/humbornjo/wango/pkg/config"
+	"github.com/lucasb-eyer/go-colorful"
+	"strings"
 )
 
 func (m model) headerRender() string {
@@ -60,33 +62,61 @@ func (m model) centerRender(page string) string {
 }
 
 func (m model) bodyRender() string {
+	var upleft, upright, bottomleft, bottomright string
 
-	inputStyle := BoxStyle(config.BoxWidth, config.BoxHeightLong)
-	upleft := inputStyle.
-		Align(lipgloss.Left).
-		Render(
-			lipgloss.JoinVertical(
-				lipgloss.Left,
-				ius[0].View(), "\n",
-				ius[1].View(), "\n",
-				ius[2].View(), "\n",
-				ius[3].View(),
-			),
-		)
+	{
+		upleft = boxChubbyStyle.
+			Align(lipgloss.Left).
+			Render(
+				lipgloss.JoinVertical(
+					lipgloss.Left,
+					ius[0].View(), "\n",
+					ius[1].View(), "\n",
+					ius[2].View(), "\n",
+					ius[3].View(),
+				),
+			)
+	}
 
-	choiceStyle := BoxStyle(config.BoxWidthHalf, config.BoxHeightShort)
-	mode := choiceStyle.
-		Align(lipgloss.Center).
-		Render(choicesView("Mode", config.ChoicesMode))
-	shader := choiceStyle.
-		Align(lipgloss.Center).
-		Render(choicesView("Shader", config.ChoicesShader))
-	bottomleft := lipgloss.JoinHorizontal(lipgloss.Center, mode, shader)
+	{
+		mode := boxSkinnyHalfStyle.
+			Align(lipgloss.Left).
+			Render(ius[5].View())
+		shader := boxSkinnyHalfStyle.
+			Align(lipgloss.Left).
+			Render(ius[6].View())
+		bottomleft = lipgloss.JoinHorizontal(lipgloss.Center, mode, shader)
+	}
 
 	leftbar := lipgloss.JoinVertical(lipgloss.Top, upleft, bottomleft)
 
-	upright := BoxStyle(config.BoxWidth, config.BoxHeightLong).Render(ius[4].View())
-	bottomright := BoxStyle(config.BoxWidth, config.BoxHeightShort).Render("filter")
+	{
+		colors := func() string {
+			colors := colorGrid(config.BoxWidthHalf, 7)
+			b := strings.Builder{}
+			for _, x := range colors {
+				for _, y := range x {
+					s := lipgloss.NewStyle().SetString("  ").Background(lipgloss.Color(y))
+					b.WriteString(s.String())
+				}
+				b.WriteRune('\n')
+			}
+			return b.String()
+		}()
+		upright = boxChubbyStyle.Render(
+			lipgloss.JoinVertical(
+				lipgloss.Left,
+				colors,
+				ius[4].View(),
+			),
+		)
+	}
+
+	{
+		bottomright = boxSkinnyStyle.
+			Align(lipgloss.Left).
+			Render(ius[7].View())
+	}
 
 	rightbar := lipgloss.JoinVertical(lipgloss.Top, upright, bottomright)
 
@@ -108,11 +138,12 @@ func checkbox(choice *config.Choice) string {
 	} else {
 		choosen = choice.Label
 	}
-	return selected + choosen
+	return choosen + selected
 }
 
 func choicesView(title string, choices []*config.Choice) string {
-	view := choiceTitleStyle.Bold(true).Render(title) + "\n"
+	view := boldStyle.Render(title) + "\n"
+	view += "──────────" + "\n"
 
 	for _, choice := range choices {
 		view += fmt.Sprintf("%s\n", checkbox(choice))
@@ -120,4 +151,33 @@ func choicesView(title string, choices []*config.Choice) string {
 	view = view[:len(view)-1]
 
 	return view
+}
+
+// Color grid
+func colorGrid(xSteps, ySteps int) [][]string {
+	x0y0, _ := colorful.Hex(string(config.ClrFontFocus))
+	x1y0, _ := colorful.Hex(string(config.ClrFontHard))
+	x0y1, _ := colorful.Hex(string(config.ClrFontDimed))
+	x1y1, _ := colorful.Hex(string(config.ClrFontNomo))
+
+	x0 := make([]colorful.Color, ySteps)
+	for i := range x0 {
+		x0[i] = x0y0.BlendLuv(x0y1, float64(i)/float64(ySteps))
+	}
+
+	x1 := make([]colorful.Color, ySteps)
+	for i := range x1 {
+		x1[i] = x1y0.BlendLuv(x1y1, float64(i)/float64(ySteps))
+	}
+
+	grid := make([][]string, ySteps)
+	for x := 0; x < ySteps; x++ {
+		y0 := x0[x]
+		grid[x] = make([]string, xSteps)
+		for y := 0; y < xSteps; y++ {
+			grid[x][y] = y0.BlendLuv(x1[x], float64(y)/float64(xSteps)).Hex()
+		}
+	}
+
+	return grid
 }

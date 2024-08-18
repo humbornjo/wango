@@ -162,5 +162,5 @@ func (u *TextinputUnit) Blur() tea.Cmd {
 }
 
 func (u *TextinputUnit) View() string {
-	return u.title + u.data.View()
+	return boldStyle.Render(u.title) + u.data.View()
 }

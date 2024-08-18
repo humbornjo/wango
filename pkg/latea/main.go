@@ -12,23 +12,23 @@ var (
 	inputHeight textinput.Model = TextinputStyle(6, ": ")
 	inputSize   textinput.Model = TextinputStyle(6, ": ")
 	inputPath   textinput.Model = TextinputStyle(26, ": ")
-	inputClrBg  textinput.Model = TextinputStyle(10, ": ")
+	inputClrBg  textinput.Model = TextinputStyle(10, ":\n")
 
 	winWidth  int
 	winHeight int
 	ius       = []InputUnit{
-		&TextinputUnit{&inputWidth, "width"},
-		&TextinputUnit{&inputHeight, "height"},
-		&TextinputUnit{&inputSize, "tile size"},
-		&TextinputUnit{&inputPath, "save path"},
-		&TextinputUnit{&inputClrBg, "background color"},
-		&SingleChoiceUnit{config.ChoicesMode, "mode"},
-		&SingleChoiceUnit{config.ChoicesShader, "shader"},
+		&TextinputUnit{&inputWidth, "Width    "},
+		&TextinputUnit{&inputHeight, "Height   "},
+		&TextinputUnit{&inputSize, "Tile Size"},
+		&TextinputUnit{&inputPath, "Save Path"},
+		&TextinputUnit{&inputClrBg, "Background Color (HEX)"},
+		&SingleChoiceUnit{config.ChoicesMode, "Mode"},
+		&SingleChoiceUnit{config.ChoicesShader, "Shader"},
+		&MultiChoiceUnit{config.ChoicesFilter, "Filter"},
 	}
 )
 
 func (m model) Init() tea.Cmd {
-	inputWidth.CharLimit = 32
 	return tea.Batch(
 		tea.SetWindowTitle("wango"),
 		textinput.Blink,
