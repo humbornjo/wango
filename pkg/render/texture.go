@@ -1,9 +1,21 @@
 package render
 
 import (
+	"fmt"
 	"image/color"
 	"unsafe"
+
+	"github.com/humbornjo/wango/pkg/config"
 )
+
+func ShaderSelect(name string) (Shader, error) {
+	switch name {
+	case "moist":
+		return &MoistShader{}, nil
+	default:
+		return nil, fmt.Errorf("undefined shader")
+	}
+}
 
 func (v *Vec4f) FromRGBA(clr *color.RGBA) *Vec4f {
 	return &Vec4f{float64(clr.R), float64(clr.G), float64(clr.B), float64(clr.A)}
@@ -35,9 +47,7 @@ func (s *JapanShader) Render(p Vec2f, pattern TilePattern, clr color.RGBA) color
 }
 
 // moist shader
-type MoistShader struct {
-	palette color.Palette
-}
+type MoistShader struct{}
 
 func (s *MoistShader) Render(p Vec2f, tilep TilePattern, bgclr color.RGBA) color.RGBA {
 	radius := 0.5
@@ -47,8 +57,8 @@ func (s *MoistShader) Render(p Vec2f, tilep TilePattern, bgclr color.RGBA) color
 
 	for i, side := range sides {
 		t := 1 - min(p.Dist(side, 2)/radius, 1)
-		clr := s.palette[bltr[i]].(color.RGBA)
-		clr4f := (&Vec4f{}).FromRGBA(&clr).Div(0xff)
+		clr := config.Palette[bltr[i]].(*color.RGBA)
+		clr4f := (&Vec4f{}).FromRGBA(clr).Div(0xff)
 		rgba4f = rgba4f.Fmax(rgba4f.Lerp(clr4f, t))
 	}
 

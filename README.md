@@ -20,21 +20,24 @@ wang's tile artwork generator impl by go.
 # test
 make test && open grid.png
 
+# install
+go install github.com/humbornjo/wango
+
 # run
 # - empty input will use default config instead
 # - just run and press ENTER
-go install github.com/humbornjo/wango && wango
+wango
+wango -s 114514 -p "#ff00ff;#00ff00"
 
-# to uninstall 
+# uninstall 
 rm $GOPATH/bin/wango
-
 ```
 
 # todo
 
-[ ] seed support
+[x] seed support
  
-[ ] add some filters like sobel, etc.
+[x] add some filters like sobel, etc.
 
 [x] prettier layout
 

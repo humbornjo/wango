@@ -122,7 +122,9 @@ func (u *MultiChoiceUnit) Update(message tea.Msg) tea.Cmd {
 			u.data[(idx+offset+length)%length].Selected = true
 		case " ":
 			for _, choice := range u.data {
-				choice.Choosen = !choice.Choosen
+				if choice.Selected {
+					choice.Choosen = !choice.Choosen
+				}
 			}
 		}
 	}

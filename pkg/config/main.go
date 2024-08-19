@@ -2,6 +2,7 @@ package config
 
 import (
 	"image/color"
+	"math/rand"
 
 	"github.com/charmbracelet/lipgloss"
 )
@@ -28,8 +29,10 @@ var (
 	ClrFontHard     = lipgloss.Color("#F0A8D0")
 	ClrFontFocus    = lipgloss.Color("#FFC6C6")
 	ClrFontDimed    = lipgloss.Color("#626262")
+	ClrBackground   = color.RGBA{}
 
-	ClrBackground = color.RGBA{}
+	Rng     *rand.Rand
+	Palette color.Palette
 )
 
 type Man struct {
@@ -55,7 +58,8 @@ var ChoicesShader = []*Choice{
 
 var ChoicesFilter = []*Choice{
 	{"identical  ", true, false},
-	{"noise      ", false, false},
+	{"sepia      ", false, false},
+	{"invert     ", false, false},
 }
 
 var Manual = []Man{

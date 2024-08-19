@@ -9,6 +9,13 @@ import (
 	"testing"
 )
 
+var DefaultShader = &MoistShader{}
+var DefaultClrNum = len(DefaultPalette)
+var DefaultPalette = color.Palette{
+	color.RGBA{0xff, 0, 0, 0xff},
+	color.RGBA{0, 0xff, 0xff, 0xff},
+}
+
 func defaultSave(path string, img image.Image) {
 	f, err := os.Create(path)
 	if err != nil {
@@ -27,7 +34,7 @@ func TestSingle(t *testing.T) {
 		WithSize(SIZE),
 		WithBgColor(color.RGBA{}),
 		WithShader(DefaultShader),
-		WithNumColor(DefaultClrNum),
+		WithPatternSize(DefaultClrNum),
 	)
 
 	go wang.Map()
@@ -44,7 +51,7 @@ func TestGrid(t *testing.T) {
 		WithSize(SIZE),
 		WithBgColor(color.RGBA{}),
 		WithShader(DefaultShader),
-		WithNumColor(DefaultClrNum),
+		WithPatternSize(DefaultClrNum),
 	)
 
 	go wang.Map()

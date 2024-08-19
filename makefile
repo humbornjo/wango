@@ -8,5 +8,4 @@ test:
 	go test -v ./...
 
 clean: 
-	rm -rf ./bin/*
-	rm -rf ./*.png
+	rm -rf ./bin/* ./*.png wango
